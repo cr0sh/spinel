@@ -26,7 +26,7 @@ var numberOfAvatars int64 = 0
 
 func main() {
 	listFetchers := make([]listFetcher, 4)
-	avatarFetchers := make([]avatarFetcher, 32)
+	avatarFetchers := make([]avatarFetcher, 48)
 
 	idChan := make(chan int, chanBufSize)
 	imgUrlChan := make(chan []spinel.ListElement, chanBufSize)
@@ -81,7 +81,7 @@ func main() {
 	}
 	// TODO: Fire workers, start statistics loggers with time.Tick(), numberOfAvatars updater goroutine
 	go func() {
-		for range time.Tick(time.Second * 5) {
+		for range time.Tick(time.Minute * 10) {
 			n := atomic.LoadInt64(&numberOfAvatars)
 			log.Printf("Current numOfAvatars value: %d (%05.2f%%)", n, float64(n)/1e6*100)
 		}
@@ -107,10 +107,10 @@ func main() {
 		}
 	}()
 
-	then := time.After(time.Second * 5)
+	stop := time.After(time.Hour * 16)
 	for i := 1; i <= 1e6; i += 10 {
 		select {
-		case <-then:
+		case <-stop:
 			log.Printf("Stopping workers...")
 			close(idChan)
 			listFetcherWg.Wait()
